@@ -5,6 +5,7 @@ from pathlib import Path
 from PIL import Image
 import numpy as np
 from torch.utils.data import DataLoader
+from torchvision.datasets import ImageFolder
 from lightning_classify.data import OnepieceImageDataModule
 
 
@@ -16,7 +17,7 @@ class TestOnepieceImageDataModule(unittest.TestCase):
 
         # Create train and val directories
         self.train_dir = Path(self.test_dir).joinpath("train")
-        self.val_dir = Path(self.test_dir).joinpath("val")
+        self.val_dir = Path(self.test_dir).joinpath("valid")
         self.train_dir.mkdir(parents=True, exist_ok=True)
         self.val_dir.mkdir(parents=True, exist_ok=True)
 
@@ -37,23 +38,34 @@ class TestOnepieceImageDataModule(unittest.TestCase):
             image = Image.fromarray(np.uint8(np.random.rand(*image_size, 3) * 255))
             image.save(dir_path / "fake_class" / f"img_{i}.jpg")
 
-    def test_train_dataloader(self):
-        train_loader = self.data_loader.train_dataloader()
-        self.assertIsInstance(train_loader, DataLoader)
-        self.assertEqual(len(train_loader.dataset), 10)
-        batch = next(iter(train_loader))
-        images, labels = batch
-        self.assertEqual(images.shape[0], 2)  # batch_size
-        self.assertEqual(images.shape[1:], (3, 224, 224))  # transformed image size
+    def test_build_dataset(self):
+        # build dataset
+        fake_trainset = self.data_loader._build_dataset(mode="train")
+        fake_valset = self.data_loader._build_dataset(mode="valid")
 
-    def test_val_dataloader(self):
-        val_loader = self.data_loader.val_dataloader()
-        self.assertIsInstance(val_loader, DataLoader)
-        self.assertEqual(len(val_loader.dataset), 5)
-        batch = next(iter(val_loader))
-        images, labels = batch
-        self.assertEqual(images.shape[0], 2)  # batch_size
-        self.assertEqual(images.shape[1:], (3, 224, 224))  # transformed image size
+        # test dataset type
+        self.assertIsInstance(fake_trainset, ImageFolder)
+        self.assertIsInstance(fake_valset, ImageFolder)
+
+        # test how many dataset
+        self.assertTrue(len(fake_trainset), 10)
+        self.assertTrue(len(fake_valset), 5)
+
+    def test_build_dataloader(self):
+        # build loader
+        fake_train_loader = self.data_loader._build_dataloader(mode="train")
+        fake_val_loader = self.data_loader._build_dataloader(mode="valid")
+
+        # test loader type
+        self.assertIsInstance(fake_train_loader, DataLoader)
+        self.assertIsInstance(fake_val_loader, DataLoader)
+
+        # iterate over loader
+        train_in, train_out = next(iter(fake_train_loader))
+        val_in, val_out = next(iter(fake_val_loader))
+        
+        self.assertEqual(len(train_in), 2)
+        self.assertEqual(len(val_in), 2)
 
     def test_class_names_and_class_to_idx(self):
         self.assertEqual(self.data_loader.class_names, ["fake_class"])
