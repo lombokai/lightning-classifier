@@ -22,11 +22,11 @@ class TestOnepieceImageDataModule(unittest.TestCase):
         self.val_dir.mkdir(parents=True, exist_ok=True)
 
         # Create dummy images in train and val directories
-        self.create_dummy_images(self.train_dir, num_images=10, image_size=(256, 256))
-        self.create_dummy_images(self.val_dir, num_images=5, image_size=(256, 256))
+        self.create_dummy_images(self.train_dir, num_images=10, image_size=(321, 251))
+        self.create_dummy_images(self.val_dir, num_images=5, image_size=(251, 321))
 
         # Create the data loader
-        self.data_loader = OnepieceImageDataModule(root_path=self.test_dir, batch_size=2, num_workers=1)
+        self.data_module = OnepieceImageDataModule(root_path=self.test_dir, batch_size=2, num_workers=1)
 
     def tearDown(self):
         # Remove the directory after the test
@@ -38,35 +38,36 @@ class TestOnepieceImageDataModule(unittest.TestCase):
             image = Image.fromarray(np.uint8(np.random.rand(*image_size, 3) * 255))
             image.save(dir_path / "fake_class" / f"img_{i}.jpg")
 
-    def test_build_dataset(self):
-        # build dataset
-        fake_trainset = self.data_loader._build_dataset(mode="train")
-        fake_valset = self.data_loader._build_dataset(mode="valid")
+    def test_setup(self):
+        self.data_module.setup(stage="fit")
 
-        # test dataset type
-        self.assertIsInstance(fake_trainset, ImageFolder)
-        self.assertIsInstance(fake_valset, ImageFolder)
+        self.assertIsInstance(self.data_module.trainset, ImageFolder)
+        self.assertIsInstance(self.data_module.validset, ImageFolder)
+        self.assertEqual(self.data_module.class_names, ["fake_class"])
+        self.assertEqual(self.data_module.class_to_idx, {"fake_class": 0})
+        self.assertEqual(len(self.data_module.trainset), 10)
+        self.assertEqual(len(self.data_module.validset), 5)
 
-        # test how many dataset
-        self.assertTrue(len(fake_trainset), 10)
-        self.assertTrue(len(fake_valset), 5)
+    def test_train_dataloader(self):
+        self.data_module.setup(stage="fit")
 
-    def test_build_dataloader(self):
-        # build loader
-        fake_train_loader = self.data_loader._build_dataloader(mode="train")
-        fake_val_loader = self.data_loader._build_dataloader(mode="valid")
+        train_loader = self.data_module.train_dataloader()
 
-        # test loader type
-        self.assertIsInstance(fake_train_loader, DataLoader)
-        self.assertIsInstance(fake_val_loader, DataLoader)
-
-        # iterate over loader
-        train_in, train_out = next(iter(fake_train_loader))
-        val_in, val_out = next(iter(fake_val_loader))
+        self.assertIsInstance(train_loader, DataLoader)
         
-        self.assertEqual(len(train_in), 2)
-        self.assertEqual(len(val_in), 2)
+        train_in, train_out = next(iter(train_loader))
 
-    def test_class_names_and_class_to_idx(self):
-        self.assertEqual(self.data_loader.class_names, ["fake_class"])
-        self.assertEqual(self.data_loader.class_to_idx, {"fake_class": 0})
+        self.assertEqual(train_in.shape[0], 2)
+        self.assertEqual(train_in.shape[1:], (3, 224, 224))
+
+    def test_val_dataloader(self):
+        self.data_module.setup(stage="fit")
+
+        val_loader = self.data_module.val_dataloader()
+
+        self.assertIsInstance(val_loader, DataLoader)
+        
+        val_in, val_out = next(iter(val_loader))
+
+        self.assertEqual(val_in.shape[0], 2)
+        self.assertEqual(val_in.shape[1:], (3, 224, 224))
