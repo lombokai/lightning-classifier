@@ -5,24 +5,22 @@ from torchvision.datasets import ImageFolder
 from torch.utils.data import DataLoader
 from lightning_classify.transforms import ImageTransform
 
-from lightning import LightningDataModule
+import lightning as L
 
 
-class OnepieceImageDataModule(LightningDataModule):
+class OnepieceImageDataModule(L.LightningDataModule):
     def __init__(self, root_path: str, batch_size: int = 32, num_workers: int = 11) -> None:
         super().__init__()
         self.root_path = Path(root_path)
         self.batch_size = batch_size
         self.num_workers = num_workers
 
+    def setup(self, stage: str) -> None:
         self.trainset = self._build_dataset(mode="train")
         self.validset = self._build_dataset(mode="valid")
         
         self.class_names = self.trainset.classes
         self.class_to_idx = self.trainset.class_to_idx
-
-        self.train_loader = self._build_dataloader(mode="train")
-        self.valid_loader = self._build_dataloader(mode="valid")
 
     def _build_dataset(self, mode: str = "train") -> ImageFolder:
         dset = None
@@ -34,25 +32,25 @@ class OnepieceImageDataModule(LightningDataModule):
             trans = ImageTransform(is_train=False)
             _path = self.root_path.joinpath(mode)
         else:
-            raise FileNotFoundError("File does not exists.")
+            raise FileNotFoundError("File not found.")
         
         dset = ImageFolder(str(_path), transform=trans)
         return dset
-
-    def _build_dataloader(self, mode: str = "train") -> DataLoader:
-        if mode == "train":
-            dset = self.trainset
-            shuffle = True
-        elif mode == "valid":
-            dset = self.validset
-            shuffle = False
-        else:
-            FileNotFoundError("File does not exist.")
-        
-        loader = DataLoader(dset, 
-                            batch_size=self.batch_size, 
-                            shuffle=shuffle, 
-                            num_workers=self.num_workers)
-        
+    
+    def train_dataloader(self) -> Any:
+        loader = DataLoader(
+            self.trainset,
+            batch_size=self.batch_size,
+            shuffle=True,
+            num_workers=self.num_workers
+        )
         return loader
     
+    def val_dataloader(self) -> Any:
+        loader = DataLoader(
+            self.validset,
+            batch_size=self.batch_size,
+            shuffle=False,
+            num_workers=self.num_workers
+        )
+        return loader
