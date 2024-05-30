@@ -8,15 +8,23 @@ import lightning as L
 from torchmetrics import Accuracy
 
 
-class ImageRecogModel(L.LightningModule):
+# define criterion
+criterion = nn.CrossEntropyLoss()
+
+class ImageRecogModelV1(L.LightningModule):
     def __init__(self, lrate: float, num_classes: int = 18) -> Any:
         super().__init__()
+
+        self.save_hyperparameters()
+
         self.num_classes = num_classes
         self.lrate = lrate
 
         self.model = self._load_backbone()
-        self.criterion = nn.CrossEntropyLoss()
-        self.metrics = Accuracy(task="multiclass", num_classes=self.num_classes)
+        self.criterion = criterion
+
+        self.train_acc = Accuracy(task="multiclass", num_classes=self.num_classes)
+        self.val_acc = Accuracy(task="multiclass", num_classes=self.num_classes)
 
     def _load_backbone(self) -> Any:
         mobile_net = models.mobilenet_v3_large(weights="DEFAULT")
