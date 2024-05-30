@@ -5,7 +5,7 @@ from torch.optim import Adam
 from torchvision import models
 from torchmetrics import Accuracy
 
-from lightning_classify.models import ImageRecogModel
+from lightning_classify.models import ImageRecogModelV1
 
 
 class TestImageRecogModel(unittest.TestCase):
@@ -16,7 +16,7 @@ class TestImageRecogModel(unittest.TestCase):
         self.batch_size = 2
         self.image_size = (3, 224, 224)
 
-        self.model = ImageRecogModel(lrate=self.lrate, num_classes=self.num_classes)
+        self.model = ImageRecogModelV1(lrate=self.lrate, num_classes=self.num_classes)
 
         # create dummy data
         self.dummy_images = torch.randn(self.batch_size, *self.image_size)
