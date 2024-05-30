@@ -12,7 +12,13 @@ from torchmetrics import Accuracy
 criterion = nn.CrossEntropyLoss()
 
 class ImageRecogModelV1(L.LightningModule):
-    def __init__(self, lrate: float, num_classes: int = 18) -> Any:
+    def __init__(
+            self, 
+            lrate: float,
+            criterion: nn.Module,
+            optim: torch.optim.Optimizer = Adam,
+            num_classes: int = 18
+        ) -> Any:
         super().__init__()
 
         self.save_hyperparameters()
@@ -22,6 +28,7 @@ class ImageRecogModelV1(L.LightningModule):
 
         self.model = self._load_backbone()
         self.criterion = criterion
+        self.optim = optim
 
         self.train_acc = Accuracy(task="multiclass", num_classes=self.num_classes)
         self.val_acc = Accuracy(task="multiclass", num_classes=self.num_classes)
@@ -66,4 +73,4 @@ class ImageRecogModelV1(L.LightningModule):
         self.log_dict({"val/loss": loss, "val/acc": acc}, prog_bar=True)
     
     def configure_optimizers(self):
-        return Adam(self.model.parameters(), lr=self.lrate)
+        return self.optim(self.model.parameters(), lr=self.lrate)
