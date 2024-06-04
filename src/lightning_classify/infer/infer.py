@@ -26,28 +26,29 @@ class ImageRecognition:
         
 
         self.device = torch.device(device)
-        self.class_dict = {
-            0: "Ace",
-            1: "Akainu",
-            2: "Brook",
-            3: "Chopper",
-            4: "Crocodile",
-            5: "Franky",
-            6: "Jinbei",
-            7: "Kurohige",
-            8: "Law",
-            9: "Luffy",
-            10: "Mihawk",
-            11: "Nami",
-            12: "Rayleigh",
-            13: "Robin",
-            14: "Sanji",
-            15: "Shanks",
-            16: "Usopp",
-            17: "Zoro",
-        } 
+        # self.class_dict = {
+        #     0: "Ace",
+        #     1: "Akainu",
+        #     2: "Brook",
+        #     3: "Chopper",
+        #     4: "Crocodile",
+        #     5: "Franky",
+        #     6: "Jinbei",
+        #     7: "Kurohige",
+        #     8: "Law",
+        #     9: "Luffy",
+        #     10: "Mihawk",
+        #     11: "Nami",
+        #     12: "Rayleigh",
+        #     13: "Robin",
+        #     14: "Sanji",
+        #     15: "Shanks",
+        #     16: "Usopp",
+        #     17: "Zoro",
+        # } 
         self.model = ImageRecogModelV1.load_from_checkpoint(self.model_path, 
                                                             map_location=self.device)
+        self.class_dict = self.model.class_dict
         
     def _get_cache_dir(self):
         if sys.platform.startswith("win"):
