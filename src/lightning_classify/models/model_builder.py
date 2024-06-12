@@ -56,7 +56,7 @@ class ImageRecogModelV1(L.LightningModule):
         loss = self.criterion(logits, y)
 
         y_class = torch.argmax(torch.softmax(logits, dim=1), dim=1)
-        acc = self.metrics(y, y_class)
+        acc = self.train_acc(y, y_class)
 
         self.log_dict({"train/loss": loss, "train/acc": acc}, prog_bar=True)
 
@@ -68,7 +68,7 @@ class ImageRecogModelV1(L.LightningModule):
         loss = self.criterion(logits, y)
 
         y_class = torch.argmax(torch.softmax(logits, dim=1), dim=1)
-        acc = self.metrics(y, y_class)
+        acc = self.val_acc(y, y_class)
 
         self.log_dict({"val/loss": loss, "val/acc": acc}, prog_bar=True)
     

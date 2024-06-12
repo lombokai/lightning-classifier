@@ -17,7 +17,7 @@ class OnepieceImageDataModule(L.LightningDataModule):
 
     def setup(self, stage: str) -> None:
         self.trainset = self._build_dataset(mode="train")
-        self.validset = self._build_dataset(mode="valid")
+        self.validset = self._build_dataset(mode="val")
         
         self.class_names = self.trainset.classes
         self.class_to_idx = self.trainset.class_to_idx
@@ -28,7 +28,7 @@ class OnepieceImageDataModule(L.LightningDataModule):
         if mode == "train":
             trans = ImageTransform(is_train=True)
             _path = self.root_path.joinpath(mode)
-        elif mode == "valid":
+        elif mode == "val":
             trans = ImageTransform(is_train=False)
             _path = self.root_path.joinpath(mode)
         else:
