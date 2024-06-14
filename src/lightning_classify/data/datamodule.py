@@ -15,7 +15,7 @@ class OnepieceImageDataModule(L.LightningDataModule):
         self.batch_size = batch_size
         self.num_workers = num_workers
 
-    def setup(self, stage: str) -> None:
+    def setup(self, stage: str=None) -> None:
         self.trainset = self._build_dataset(mode="train")
         self.validset = self._build_dataset(mode="val")
         
