@@ -14,6 +14,7 @@ class ImageRecogModelV1(L.LightningModule):
             self, 
             lrate: float,
             criterion: nn.Module,
+            # class_dict: dict,
             optim: torch.optim.Optimizer = Adam,
             num_classes: int = 18
         ) -> Any:
@@ -28,26 +29,7 @@ class ImageRecogModelV1(L.LightningModule):
         self.criterion = criterion
         self.optim = optim
 
-        self.class_dict = {
-            0: "Ace",
-            1: "Akainu",
-            2: "Brook",
-            3: "Chopper",
-            4: "Crocodile",
-            5: "Franky",
-            6: "Jinbei",
-            7: "Kurohige",
-            8: "Law",
-            9: "Luffy",
-            10: "Mihawk",
-            11: "Nami",
-            12: "Rayleigh",
-            13: "Robin",
-            14: "Sanji",
-            15: "Shanks",
-            16: "Usopp",
-            17: "Zoro"
-        }
+        # self.class_dict = class_dict
 
         self.train_acc = Accuracy(task="multiclass", num_classes=self.num_classes)
         self.val_acc = Accuracy(task="multiclass", num_classes=self.num_classes)
