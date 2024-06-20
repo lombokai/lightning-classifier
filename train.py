@@ -24,6 +24,7 @@ loader = OnepieceImageDataModule(
     batch_size=32,
     num_workers=11
 )
+loader.setup()
 
 model = ImageRecogModelV1(
     lrate = args.learning_rate,
@@ -35,27 +36,10 @@ trainer = L.Trainer(default_root_dir="checkpoint/",
                     accelerator=args.accelerator)
 
 # dict to save
-class_dict = {
-    0 : "Ace",
-    1 : "Akainu",
-    2 : "Brook",
-    3 : "Chopper",
-    4 : "Crocodile",
-    5 : "Franky",
-    6 : "Jinbei",
-    7 : "Kurohige",
-    8 : "Law",
-    9 : "Luffy",
-    10 : "Mihawk",
-    11 : "Nami",
-    12 : "Rayleigh",
-    13 : "Robin",
-    14 : "Sanji",
-    15 : "Shanks",
-    16 : "Usopp",
-    17 : "Zoro"
+manifest_dict = {
+    "class_dict": {i:val for (val, i) in loader.class_to_idx.items()}
 }
 
 if __name__ == "__main__":
-    trainer.fit(model, loader)
-    torch.save(class_dict, "checkpoint/manifest.pth", )
+    # trainer.fit(model, loader)
+    torch.save(manifest_dict, "checkpoint/manifest.pth", )
