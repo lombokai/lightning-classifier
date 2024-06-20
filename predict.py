@@ -12,7 +12,7 @@ def predict_image(
     device: str = typer.Argument("cpu", help="use cuda if your device has cuda", show_default=True)
 ):
     
-    predictor = ImageRecognition(model_path=model_path, manifest_path="checkpoint/manifest.pth", device=device)
+    predictor = ImageRecognition(model_path=model_path, device=device)
     result = predictor.predict(image=image_path)
     typer.echo(f"Prediction: {result}")
 
