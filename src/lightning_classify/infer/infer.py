@@ -14,7 +14,7 @@ from lightning_classify.transforms import ImageTransform
 
 
 class ImageRecognition:
-    def __init__(self, device: torch.device, model_path=None):
+    def __init__(self, device: torch.device, model_path=None, manifest_path=None):
         
         path_to_save = str(self._get_cache_dir()) + "/model.ckpt"
         if model_path is None:
@@ -30,7 +30,7 @@ class ImageRecognition:
                                                             criterion=nn.CrossEntropyLoss(),
                                                             map_location=self.device)
         
-        self.class_dict = self.model.class_dict
+        self.class_dict = torch.load(manifest_path)
 
     def _get_cache_dir(self):
         if sys.platform.startswith("win"):
