@@ -8,18 +8,20 @@ import torch
 import torch.nn as nn
 from PIL import Image
 
-from lightning_classify.utils import downloader
+from lightning_classify.utils import downloader, unzip
 from lightning_classify.models import ImageRecogModelV1
 from lightning_classify.transforms import ImageTransform
 
 
 class ImageRecognition:
-    def __init__(self, device: torch.device, model_path=None, manifest_path=None):
-        
-        path_to_save = str(self._get_cache_dir()) + "/model.ckpt"
+    def __init__(self, device: torch.device, model_path=None):
+
+        path_to_save = str(self._get_cache_dir()) + "/cache.zip"
         if model_path is None:
             downloader(path_to_save)
-            self.model_path = path_to_save
+            unzip(path_to_save, to_save=str(self._get_cache_dir()))
+            self.model_path = str(self._get_cache_dir()) + "/model.ckpt"
+            manifest_path = str(self._get_cache_dir()) + "/manifest.pth"
         else:
             self.model_path = Path(model_path)
             if not self.model_path.exists():
@@ -30,7 +32,7 @@ class ImageRecognition:
                                                             criterion=nn.CrossEntropyLoss(),
                                                             map_location=self.device)
         
-        self.class_dict = torch.load(manifest_path)
+        self.class_dict = torch.load(manifest_path)["class_dict"]
 
     def _get_cache_dir(self):
         if sys.platform.startswith("win"):
