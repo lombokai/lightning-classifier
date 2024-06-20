@@ -4,7 +4,7 @@ from pathlib import Path
 
 def downloader(output_file):
     
-    file_id = "1XqKMk28A-gvitoztaeH20X-dOqLNtraT" # not ignore criterion
+    file_id = "1JGUYPu5xrAg736ViylLAXi_TCro_bjQk"
     prefix = 'https://drive.google.com/uc?/export=download&id='
 
     url_download = prefix+file_id
