@@ -1,15 +1,13 @@
 from typing import Any
 
 import torch
-from torch import nn
+import torch.nn as nn
 from torchvision import models
 from torch.optim import Adam
+from torch.nn import CrossEntropyLoss
 import lightning as L
 from torchmetrics import Accuracy
 
-
-# define criterion
-criterion = nn.CrossEntropyLoss()
 
 class ImageRecogModelV1(L.LightningModule):
     def __init__(
@@ -21,7 +19,7 @@ class ImageRecogModelV1(L.LightningModule):
         ) -> Any:
         super().__init__()
 
-        self.save_hyperparameters()
+        self.save_hyperparameters(ignore=["criterion"])
 
         self.num_classes = num_classes
         self.lrate = lrate
@@ -29,6 +27,27 @@ class ImageRecogModelV1(L.LightningModule):
         self.model = self._load_backbone()
         self.criterion = criterion
         self.optim = optim
+
+        self.class_dict = {
+            0: "Ace",
+            1: "Akainu",
+            2: "Brook",
+            3: "Chopper",
+            4: "Crocodile",
+            5: "Franky",
+            6: "Jinbei",
+            7: "Kurohige",
+            8: "Law",
+            9: "Luffy",
+            10: "Mihawk",
+            11: "Nami",
+            12: "Rayleigh",
+            13: "Robin",
+            14: "Sanji",
+            15: "Shanks",
+            16: "Usopp",
+            17: "Zoro"
+        }
 
         self.train_acc = Accuracy(task="multiclass", num_classes=self.num_classes)
         self.val_acc = Accuracy(task="multiclass", num_classes=self.num_classes)

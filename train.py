@@ -1,11 +1,23 @@
 import sys
 sys.path.append("src")
+from argparse import ArgumentParser
 
-from torch import nn
+import torch
+import torch.nn as nn
 import lightning as L
 
 from lightning_classify.data import OnepieceImageDataModule
 from lightning_classify.models import ImageRecogModelV1
+
+torch.set_float32_matmul_precision('medium')
+
+# parser
+parser = ArgumentParser()
+
+parser.add_argument("--learning_rate", type=float, default=1e-3)
+parser.add_argument("--accelerator", type=str, default="gpu")
+parser.add_argument("--max_epochs", type=int, default=10)
+args = parser.parse_args()
 
 loader = OnepieceImageDataModule(
     root_path="data/",
@@ -14,13 +26,13 @@ loader = OnepieceImageDataModule(
 )
 
 model = ImageRecogModelV1(
-    lrate = 1e-3,
+    lrate = args.learning_rate,
     criterion = nn.CrossEntropyLoss(),
 )
 
-trainer = L.Trainer(max_epochs=10, 
-                    default_root_dir="checkpoint/", 
-                    accelerator="cuda")
+trainer = L.Trainer(default_root_dir="checkpoint/",
+                    max_epochs=args.max_epochs,  
+                    accelerator=args.accelerator)
 
 if __name__ == "__main__":
     trainer.fit(model, loader)
